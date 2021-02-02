@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit campground</title>
+    <title>Create campground</title>
 </head>
 <body>
-    <h1>Edit campground</h1>
-    <form action="/campgrounds/<%= campground._id %>?_method=PUT " method="POST">
+    <h1>Create campground</h1>
+    <form action="/campgrounds" method="POST">
         <label for="campname">Camp title</label>
-        <input type="text" name="campground[title]" id="campname" value="<%= campground.title %>">
+        <input type="text" name="campground[title]" id="campname">
         <label for="location">Location</label>
-        <input type="text" name="campground[location]" id="location" value="<%= campground.location %>">
+        <input type="text" name="campground[location]" id="location">
         <button>Submit</button>
     </form>
     <p><a href="/campgrounds">Back to index</a></p>
