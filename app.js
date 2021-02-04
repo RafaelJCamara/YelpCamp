@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const ejsMate = require("ejs-mate");
 const mongoose = require("mongoose");
 const Campground = require("./models/campground.js");
 const methodOverride = require("method-override");
@@ -20,6 +21,9 @@ db.on("error", console.error.bind(console,"connection error:"));
 db.once("open", ()=>{
     console.log("Database connected...");
 });
+
+//setting engine
+app.engine("ejs",ejsMate);
 
 //views and view engine settings
 app.set("view engine","ejs");

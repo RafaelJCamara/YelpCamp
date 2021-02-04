@@ -35,11 +35,16 @@ const seedDB = async ()=>{
     //create and save new instances
     for(let i=0;i<50;i++){
         const random1000 = Math.floor(Math.random()*1000);
+        const price = Math.floor(Math.random()*20)+10;
         const camp = new Campground({
             //for location, we will use the blueprint: city,state
             location:`${cities[random1000].city},${cities[random1000].state}`,
             //the title will be based on the descriptors and places
-            title:`${sample(descriptors)} ${sample(places)}`
+            title:`${sample(descriptors)} ${sample(places)}`,
+            //image source (to be displayed)
+            image:"https://source.unsplash.com/collection/483251",
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla mattis faucibus facilisis. In leo ex, bibendum at mi eu, sodales.",
+            price
         });
         await camp.save();
     }
