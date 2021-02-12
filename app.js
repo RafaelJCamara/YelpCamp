@@ -8,8 +8,10 @@ const methodOverride = require("method-override");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
 const {
-    campgroundSchema
+    campgroundSchema, reviewSchema
 } = require("./schemas");
+const Review = require("./models/review");
+
 
 //connect to database
 
@@ -53,6 +55,16 @@ const validateCampground = (req, res, next) => {
     }
 };
 
+const validateReview = (req,res,next)=>{
+    const {error} = reviewSchema.validate(req.body);
+    if (error) {
+        const message = error.details.map(el => el.message).join(",");
+        throw new ExpressError(message, 400);
+    } else {
+        next();
+    }
+};
+
 //ROUTES 
 
 app.get("/", (req, res) => {
@@ -77,7 +89,7 @@ app.get("/campgrounds/:id", catchAsync(async (req, res) => {
     const {
         id
     } = req.params;
-    const campground = await Campground.findById(id);
+    const campground = await Campground.findById(id).populate("reviews");
     res.render("campground/show", {
         campground
     });
@@ -114,6 +126,25 @@ app.delete("/campgrounds/:id", catchAsync(async (req, res) => {
     } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect("/campgrounds");
+}));
+
+app.post("/campgrounds/:id/reviews", validateReview, catchAsync(async (req,res)=>{
+    const {id} = req.params;
+    const campground = await Campground.findById(id);
+    const review = new Review(req.body.review);
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
+}));
+
+app.delete("/campgrounds/:id/reviews/:reviewId", catchAsync( async (req,res)=>{
+    const {id, reviewId} = req.params;
+    await Campground.findByIdAndUpdate(id,{
+        $pull : {reviews:reviewId}
+    });
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/campgrounds/${id}`);
 }));
 
 //404 route
