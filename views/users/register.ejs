@@ -1,0 +1,23 @@
+<% layout("layout/boilerplate") %>
+<h1 class="text-center">User Registration</h1>
+<div class="col-6 offset-3">
+    <form action="/register" method="POST" novalidate class="validated-form">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="campname" name="username" required>
+            <div class="valid-feedback">Looks good!</div>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" aria-describedby="emailHelp" name="email" required>
+            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+            <div class="valid-feedback">Looks good!</div>
+        </div>
+        <button type="submit" class="btn btn-success">Add User</button>
+    </form>
+</div>

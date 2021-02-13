@@ -7,8 +7,12 @@ const methodOverride = require("method-override");
 const ExpressError = require("./utils/ExpressError");
 const campgroudRouter = require("./routes/campgrounds");
 const reviewRouter = require("./routes/reviews");
+const userRouter = require("./routes/users");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
 
 //connect to database
 
@@ -26,6 +30,8 @@ db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => {
     console.log("Database connected...");
 });
+//end connect to database
+
 
 //setting engine
 app.engine("ejs", ejsMate);
@@ -34,10 +40,12 @@ app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-//other settings
+//to access req.body
 app.use(express.urlencoded({
     extended: true
 }));
+
+//to enable other HTTP methods(other than POST and GET)
 app.use(methodOverride("_method"));
 
 //use static files
@@ -60,8 +68,20 @@ app.use(session(sessionConfig));
 //flash configuration
 app.use(flash());
 
+//passport middleware init
+app.use(passport.initialize());
+app.use(passport.session());
+
+//passport settings
+passport.use(new LocalStrategy(User.authenticate()));
+
+//how to store user information on session (also delete) with passport
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 //flash middleware
 app.use( (req,res,next)=>{
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     next();
@@ -70,17 +90,19 @@ app.use( (req,res,next)=>{
 
 //ROUTES 
 
-app.get("/", (req, res) => {
-    res.render("home");
-});
-
 //using campground router
 app.use("/campgrounds",campgroudRouter);
 
 //using reviews router
 app.use("/campgrounds/:id/reviews", reviewRouter);
 
+//using users router
+app.use("/",userRouter);
 
+
+app.get("/", (req, res) => {
+    res.render("home");
+});
 //404 route
 app.all("*", (req, res, next) => {
     next(new ExpressError("Page Not Found", 404));
