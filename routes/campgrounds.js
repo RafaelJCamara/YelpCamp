@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const campgroundController = require("../controllers/campgrounds");
-
 const {
     isLoggedIn,
     validateCampground,
     isAuth
 } = require("../middleware");
-
+const multer = require("multer");
+const upload = multer({dest:"uploads/"});
 
 //DEFINING REST ROUTES
 router.route("/")
