@@ -7,18 +7,20 @@ const {
     isAuth
 } = require("../middleware");
 const multer = require("multer");
-const upload = multer({dest:"uploads/"});
+//don't need to specify the index.js file, since node automatically searchs for it
+const {storage} = require("../cloudinary");
+const upload = multer({storage});
 
 //DEFINING REST ROUTES
 router.route("/")
     .get(campgroundController.index)
-    .post(validateCampground, isLoggedIn, campgroundController.createCampground);
+    .post(isLoggedIn, upload.array("image"), validateCampground, campgroundController.createCampground);
 
 router.get("/new", isLoggedIn, campgroundController.renderNewForm);
 
 router.route("/:id")
     .get(campgroundController.getCampgroundDetail)
-    .put(validateCampground, isLoggedIn, isAuth, campgroundController.editCampground)
+    .put(isLoggedIn, isAuth, upload.array("image"), validateCampground, campgroundController.editCampground)
     .delete(isLoggedIn, isAuth, campgroundController.deleteCampground);
 
 router.get("/:id/edit", isLoggedIn, isAuth, campgroundController.renderEditForm);
