@@ -12,6 +12,14 @@ ImageSchema.virtual("thumbnail").get(function(){
     return this.url.replace("/upload","/upload/w_300");
 });
 
+
+//allow virtuals to be part of json
+const opts = {
+    toJSON:{
+        virtuals:true
+    }
+};
+
 //defining the campground schema
 const CampgroundSchema = new Schema({
     title : String,
@@ -40,6 +48,14 @@ const CampgroundSchema = new Schema({
             ref:"Review"
         }
     ]
+},opts);
+
+//virtual for campground popup markup (text)
+CampgroundSchema.virtual("properties.popUpMarkup").get(function(){
+    return `
+        <strong><a href="/campgrounds/${this._id}">${this.title}</a></strong>
+        <p>${this.description.substring(0,20)}...</p>
+    `;
 });
 
 //define middleware
