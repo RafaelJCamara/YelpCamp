@@ -18,6 +18,9 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
+const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
+
 
 //connect to database
 
@@ -56,14 +59,20 @@ app.use(methodOverride("_method"));
 //use static files
 app.use(express.static(path.join(__dirname,"public")));
 
+//config sanitize
+app.use(mongoSanitize());
+
 //configure session
 const sessionConfig = {
+    name:"session",
     secret:"thisshouldbeabettersecret!",
     resave:false,
     saveUninitialized:true,
     //settings for the cookie
     cookie:{
         httpOnly:true,
+        //cookies send only by https
+        //secure:true,
         expires: Date.now() + 7*24*60*60*1000,
         maxAge: Date.now() + 7 * 24 * 60 * 60 * 1000
     }
@@ -72,6 +81,55 @@ app.use(session(sessionConfig));
 
 //flash configuration
 app.use(flash());
+
+//init helmet
+app.use(helmet());
+
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+    "https://cdn.jsdelivr.net",
+];
+const connectSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+    "https://cdn.jsdelivr.net",
+];
+const fontSrcUrls = [];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/dy5jqy5fw/",
+                "https://images.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
 
 //passport middleware init
 app.use(passport.initialize());
